@@ -12,9 +12,9 @@ datasource db {
 
 model User {
   id       Int    @id @default(autoincrement())
-  email    String
+  email    String @unique
   password String
-  acctId   String @unique @db.Uuid
+  acctId   String  @default(uuid())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -22,6 +22,8 @@ model User {
   profile  Profile?
   cart     Cart?
   products Product[]
+
+  @@map("users")
 }
 
 model Profile {
@@ -39,6 +41,8 @@ model Profile {
 
   user   User @relation(fields: [userId], references: [id])
   userId Int  @unique // relation scalar field (used in the `@relation` attribute above)
+
+  @@map("profiles")
 }
 
 model Product {
@@ -64,6 +68,8 @@ model Product {
   customerId Int // relation scalar field  (used in the `@relation` attribute above)
 
   carts CartProducts[]
+
+  @@map("products")
 }
 
 model Cart {
@@ -76,6 +82,8 @@ model Cart {
   userId Int  @unique // relation scalar field (used in the `@relation` attribute abcart
 
   products CartProducts[]
+
+  @@map("carts")
 }
 
 model CartProducts {
@@ -94,6 +102,8 @@ model Order {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("orders")
 }
 
 model Category {
@@ -104,4 +114,6 @@ model Category {
 
   title String
   desc  String
+
+  @@map("categories")
 }
