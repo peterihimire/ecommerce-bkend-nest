@@ -95,6 +95,7 @@ model CartProducts {
   addedBy   String
 
   @@id([productId, cartId])
+  @@map("cart_products")
 }
 
 model Order {
