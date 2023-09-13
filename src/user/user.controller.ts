@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 // import { AuthDto } from './dto';
 
 @UseGuards(JwtGuard) //general route
-@Controller('api/ecommerce/v1/users/')
+@Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
