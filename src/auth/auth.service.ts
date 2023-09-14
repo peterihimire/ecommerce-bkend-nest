@@ -97,12 +97,58 @@ export class AuthService {
     const secret = this.config.get('JWT_SECRET');
 
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '10m',
+      expiresIn: '1h',
       secret: secret,
     });
 
     return {
       access_token: token,
     };
+  }
+
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) throw new ForbiddenException('Incorrect credentials!');
+    const verifyPass = await argon.verify(user.password, password);
+    if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
+
+    delete user.password;
+    delete user.id;
+    delete user.createdAt;
+    delete user.updatedAt;
+
+    return user;
+  }
+
+  async verifyUser(email: string, password: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+
+      if (!user) throw new ForbiddenException('Incorrect credentials!');
+      const verifyPass = await argon.verify(user.password, password);
+      if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
+
+      delete user.password;
+      delete user.id;
+      delete user.createdAt;
+      delete user.updatedAt;
+
+      return {
+        status: 'success',
+        msg: 'User login successful!',
+        data: user,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
