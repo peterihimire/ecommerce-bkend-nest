@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -8,6 +8,7 @@ export class UserService {
   async profile(user: any) {
     try {
       console.log('This is user payload', user);
+      Logger.verbose('This is user payload', user);
 
       const acct = await this.prisma.user.findUnique({
         where: {
