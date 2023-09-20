@@ -1,16 +1,16 @@
-import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
 import * as passport from 'passport';
 import * as session from 'express-session';
 import { RedisModule } from './redis/redis.module';
-import { REDIS } from './redis/redis.constants';
-// import { createClient } from 'redis';
-// import { RedisMiddleware } from './redis/redis.middleware';
+import { createClient } from 'redis';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisService } from './redis/redis.service';
+import RedisStore from 'connect-redis';
 
 @Module({
   imports: [
@@ -23,28 +23,49 @@ import { REDIS } from './redis/redis.constants';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RedisService],
 })
 export class AppModule implements NestModule {
-  constructor(@Inject(REDIS) private readonly redis) {}
+  constructor(private readonly configService: ConfigService) {}
+
   configure(consumer: MiddlewareConsumer) {
+    // Session
+    const redisUrl: string = this.configService.get('REDIS_URL');
+    const redisClient = createClient({
+      url: redisUrl,
+      legacyMode: false,
+    });
+    redisClient.connect().catch(console.error);
+
+    // Initialize store.
+    const redisStore = new RedisStore({
+      client: redisClient,
+      prefix: 'ecommerce-app:',
+    });
+
+    redisClient.on('error', (err) =>
+      Logger.error('Could not establish a connection with redis. ' + err),
+    );
+    redisClient.on('connect', () =>
+      Logger.verbose('Connected to redis successfully(middleware)'),
+    );
     consumer
       .apply(
         session({
-          store: this.redis,
-          secret: 'sup3rs3cr3t',
+          store: redisStore,
+          secret: this.configService.get('SESSION_SECRET'),
           saveUninitialized: false,
           resave: false,
           cookie: {
             sameSite: true,
             httpOnly: false,
             maxAge: 60000,
+            secure: false,
           },
         }),
         passport.initialize(),
         passport.session(),
       )
-      .forRoutes('users');
+      .forRoutes('*');
   }
 }
-// RedisMiddleware, passport.initialize(), passport.session()
