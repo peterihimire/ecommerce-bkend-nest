@@ -31,7 +31,7 @@ async function main() {
     },
   });
 
-  console.log({ role1, role2, role3 });
+  console.log('Seems like this mfk is running...', role1, role2, role3);
 
   // const roles = await prisma.role.upsert({data: []})
 }

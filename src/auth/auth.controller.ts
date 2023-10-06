@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
+import { AuthDto, RegDto } from './dto';
 // import { AuthGuard } from '@nestjs/passport';
 import { LocalGuard } from './guard/local.guard';
 
@@ -9,7 +9,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: AuthDto) {
+  register(@Body() dto: RegDto) {
     // console.log('This is dto...', dto);
     return this.authService.register(dto);
   }
