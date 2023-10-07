@@ -166,21 +166,45 @@ export class AuthService {
         where: {
           email: email,
         },
+        include: {
+          // profile: true,
+          roles: {
+            select: {
+              userId: false,
+              roleId: true,
+            },
+          },
+        },
       });
+
+      const roleIds = user.roles.map((role) => role.roleId);
+
+      const roles = await this.prisma.role.findMany({
+        where: {
+          id: { in: roleIds },
+        },
+      });
+
+      const userWithRoleNames = {
+        ...user,
+        roles: roles.map((role) => role.name),
+      };
+
+      console.log('These are his roles...', userWithRoleNames);
 
       if (!user) throw new ForbiddenException('Incorrect credentials!');
       const verifyPass = await argon.verify(user.password, password);
       if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
 
-      delete user.password;
-      delete user.id;
-      delete user.createdAt;
-      delete user.updatedAt;
+      delete userWithRoleNames.password;
+      delete userWithRoleNames.id;
+      delete userWithRoleNames.createdAt;
+      delete userWithRoleNames.updatedAt;
 
       return {
         status: 'success',
-        msg: 'User login successful!',
-        data: user,
+        msg: 'Login successful!',
+        data: userWithRoleNames,
       };
     } catch (error) {
       throw error;
@@ -188,164 +212,38 @@ export class AuthService {
   }
 }
 
-// if (dto.roles) {
-//   const roleNames = dto.roles;
-
-//   const userRoles = await this.prisma.role.findMany({
-//     where: {
-//       name: {
-//         in: roleNames,
+// async verifyUser(email: string, password: string) {
+//   try {
+//     const user = await this.prisma.user.findUnique({
+//       where: {
+//         email: email,
 //       },
-//     },
-//   });
-
-//   const roleIds = userRoles.map((role) => role.id);
-
-//   // Disconnect all current roles and connect the selected roles
-//   await this.prisma.userRoles.deleteMany({
-//     where: {
-//       userId: user.id,
-//     },
-//   });
-
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     data: {
-//       roles: {
-//         connect: roleIds.map((roleId) => ({ id: roleId })),
+//       include: {
+//         // profile: true,
+//         roles: {
+//           select: {
+//             userId: false,
+//             roleId: true,
+//           },
+//         },
 //       },
-//     },
-//   });
-// } else {
-//   // If no roles are provided, you can connect a default role (e.g., role with ID 1)
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     data: {
-//       roles: {
-//         connect: [{ id: 1 }], // Assuming the default role ID is 1
-//       },
-//     },
-//   });
-// }
+//     });
 
-// if (dto.roles) {
-//   const userRoles = await this.prisma.role.findMany({
-//     where: {
-//       name: {
-//         in: dto.roles,
-//       },
-//     },
-//   });
-//   // const roleIds = userRoles.map((role) => ({ id: role.id }));
-//   const roleIds = userRoles.map((role) => role.id);
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     // data: { roles: { set: userRoles.map((role) => ({ id: role.id })) } },
-//     data: { roles: { set: roleIds } },
-//   });
-// } else {
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     // data: { roles: { set: [1] } },
-//     data: { roles: { set: [{ id: 1 }] } },
-//   });
-// }
-// if (dto.roles) {
-//   const roleNames = dto.roles;
+//     if (!user) throw new ForbiddenException('Incorrect credentials!');
+//     const verifyPass = await argon.verify(user.password, password);
+//     if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
 
-//   const userRoles = await this.prisma.role.findMany({
-//     where: {
-//       name: {
-//         in: roleNames,
-//       },
-//     },
-//   });
+//     delete user.password;
+//     delete user.id;
+//     delete user.createdAt;
+//     delete user.updatedAt;
 
-//   const roleIds = userRoles.map((role) => role.id);
-
-//   // Disconnect all current roles and connect the selected roles
-//   await this.prisma.userRoles.deleteMany({
-//     where: {
-//       userId: user.id,
-//     },
-//   });
-
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     data: {
-//       roles: {
-//         set: roleIds, // Use 'set' to replace the existing roles
-//       },
-//     },
-//   });
-// } else {
-//   // If no roles are provided, you can connect a default role (e.g., role with ID 1)
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     data: {
-//       roles: {
-//         set: [1], // Assuming the default role ID is 1
-//       },
-//     },
-//   });
-// }
-
-// if (dto.roles) {
-//   const userRoles = await this.prisma.role.findMany({
-//     where: {
-//       name: {
-//         in: dto.roles,
-//       },
-//     },
-//   });
-//   // const roleIds = userRoles.map((role) => ({ id: role.id }));
-//   const roleIds = userRoles.map((role) => role.id);
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     // data: { roles: { set: userRoles.map((role) => ({ id: role.id })) } },
-//     data: {
-//       roles: {
-//         set: roleIds,
-//       },
-//     },
-//   });
-// } else {
-//   await this.prisma.user.update({
-//     where: { id: user.id },
-//     data: {
-//       roles: {
-//         set: [1],
-//       },
-//     },
-//     // data: { roles: { set: [{ id: 1 }] } },
-//   });
-// }
-
-// if (dto.roles) {
-//   const roleNames = dto.roles;
-
-//   const userRoles = await this.prisma.role.findMany({
-//     where: {
-//       name: {
-//         in: roleNames,
-//       },
-//     },
-//   });
-
-//   const userRolesData = userRoles.map((role) => ({
-//     user: { connect: { id: user.id } },
-//     role: { connect: { id: role.id } },
-//   }));
-
-//   await this.prisma.userRoles.createMany({
-//     data: userRolesData,
-//   });
-// } else {
-//   // If no roles are provided, you can connect a default role (e.g., role with ID 1)
-//   await this.prisma.userRoles.create({
-//     data: {
-//       user: { connect: { id: user.id } },
-//       role: { connect: { id: 1 } }, // Assuming the default role ID is 1
-//     },
-//   });
+//     return {
+//       status: 'success',
+//       msg: 'User login successful!',
+//       data: user,
+//     };
+//   } catch (error) {
+//     throw error;
+//   }
 // }

@@ -19,5 +19,5 @@ export class RegDto {
 
   @IsOptional()
   @IsArray()
-  readonly roles?: string[];
+  roles?: string[];
 }

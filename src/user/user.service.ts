@@ -14,11 +14,9 @@ export class UserService {
         where: {
           email: user.data.email,
         },
-      });
-
-      const profile = await this.prisma.profile.findUnique({
-        where: {
-          acctId: user.data.acctId,
+        include: {
+          profile: true,
+          roles: true,
         },
       });
 
@@ -27,14 +25,13 @@ export class UserService {
       delete acct.id;
       delete acct.createdAt;
       delete acct.updatedAt;
-      delete profile.createdAt;
-      delete profile.updatedAt;
+
       return {
         status: 'success',
         msg: 'User info',
         data: {
           ...acct,
-          profile,
+          // profile,
         },
       };
       // return {
