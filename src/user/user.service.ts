@@ -16,27 +16,49 @@ export class UserService {
         },
         include: {
           profile: true,
-          roles: true,
+          roles: {
+            select: {
+              userId: false,
+              roleId: true,
+            },
+          },
         },
       });
 
+      const roleIds = acct.roles.map((role) => role.roleId);
+
+      const roles = await this.prisma.role.findMany({
+        where: {
+          id: { in: roleIds },
+        },
+      });
+
+      const userWithRoleNames = {
+        ...acct,
+        roles: roles.map((role) => role.name),
+      };
+
+      console.log('These are his roles...', userWithRoleNames);
+
       if (!acct) throw new ForbiddenException('No user!');
-      delete acct.password;
-      delete acct.id;
-      delete acct.createdAt;
-      delete acct.updatedAt;
+      // const verifyPass = await argon.verify(user.password, password);
+      // if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
+
+      delete userWithRoleNames.password;
+      delete userWithRoleNames.id;
+      delete userWithRoleNames.createdAt;
+      delete userWithRoleNames.updatedAt;
+      delete userWithRoleNames.profile.createdAt;
+      delete userWithRoleNames.profile.updatedAt;
+      delete userWithRoleNames.profile.acctId;
+      delete userWithRoleNames.profile.id;
+      delete userWithRoleNames.profile.userId;
 
       return {
         status: 'success',
         msg: 'User info',
-        data: {
-          ...acct,
-          // profile,
-        },
+        data: userWithRoleNames,
       };
-      // return {
-      //   msg: 'Dashboard success',
-      // };
     } catch (error) {
       throw error;
     }
