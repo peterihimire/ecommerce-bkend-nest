@@ -27,6 +27,8 @@ export class AuthController {
     //   status: 'success',
     //   msg: 'you are signed in',
     // };
+    req.session.user = req.user;
+    // console.log('This is the user mfk...', req.session.user);
     return req.user;
   }
 }
