@@ -16,7 +16,7 @@ import {
   User,
   // Cart
 } from '@prisma/client';
-import { RoleExceptionFilter } from 'src/exceptions';
+import { RoleExceptionFilter } from 'src/exception';
 
 // @UseGuards(JwtGuard) //parent route
 @Controller('carts')
@@ -30,12 +30,13 @@ export class CartController {
   addToCart(
     @Session() session: Record<string, any>,
     @Body() dto: AddToCartDto,
-    @GetUser() user: User,
+    // @GetUser() user: User,
   ) {
-    console.log('This is the session data...', session);
-    console.log('This is user object...', user);
-    console.log('This is the add to cart body...', dto);
-    return this.cartService.addToCart(dto);
+    console.log('This is the session data...', session.user.data);
+    const sess = session.user.data;
+    // console.log('This is user object...', user);
+    // console.log('This is the add to cart body...', dto);
+    return this.cartService.addToCart(dto, sess);
   }
 
   @Roles('admin', 'moderator', 'user')

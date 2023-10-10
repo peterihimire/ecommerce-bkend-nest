@@ -74,22 +74,22 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title        String
-  slug         String
-  image        String?
+  title        String @unique
+  slug         String @unique
+  image        String[]
   color        String[]
   category     String[]
-  price        String
-  brand        String[]
+  price        Int
+  brand        String
   countInStock Int?
   rating       Int?
   desc         String
   size         String[]
   numReviews   String?
-  uuid         String   @unique @db.Uuid
+  prodId       String @default(uuid())
 
-  customer   User @relation(fields: [customerId], references: [id])
-  customerId Int // relation scalar field  (used in the `@relation` attribute above)
+  admin   User @relation(fields: [adminId], references: [id])
+  adminId Int // relation scalar field  (used in the `@relation` attribute above)
 
   carts CartProducts[]
 

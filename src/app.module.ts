@@ -12,12 +12,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisService } from './redis/redis.service';
 import RedisStore from 'connect-redis';
 import { CartModule } from './cart/cart.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     CartModule,
+    ProductModule,
     PrismaModule,
     RedisModule,
     ConfigModule.forRoot({

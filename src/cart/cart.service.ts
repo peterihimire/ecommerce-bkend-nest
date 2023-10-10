@@ -9,9 +9,11 @@ import { AddToCartDto } from './dto';
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
-  async addToCart(dto: AddToCartDto) {
+  async addToCart(dto: AddToCartDto, session: any) {
     try {
       console.log('This is addtocart  payload', dto);
+      console.log('This is session data in service', session);
+
       // // Logger.verbose('This is user payload', user);
 
       // const acct = await this.prisma.user.findUnique({

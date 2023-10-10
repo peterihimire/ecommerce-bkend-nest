@@ -1,57 +1,31 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Cart` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Category` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Order` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Product` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "Cart" DROP CONSTRAINT "Cart_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "CartProducts" DROP CONSTRAINT "CartProducts_cartId_fkey";
-
--- DropForeignKey
-ALTER TABLE "CartProducts" DROP CONSTRAINT "CartProducts_productId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Product" DROP CONSTRAINT "Product_customerId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
-
--- DropTable
-DROP TABLE "Cart";
-
--- DropTable
-DROP TABLE "Category";
-
--- DropTable
-DROP TABLE "Order";
-
--- DropTable
-DROP TABLE "Product";
-
--- DropTable
-DROP TABLE "Profile";
-
--- DropTable
-DROP TABLE "User";
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "acctId" UUID,
+    "acctId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "roles" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_roles" (
+    "userId" INTEGER NOT NULL,
+    "roleId" INTEGER NOT NULL,
+
+    CONSTRAINT "user_roles_pkey" PRIMARY KEY ("roleId","userId")
 );
 
 -- CreateTable
@@ -78,18 +52,18 @@ CREATE TABLE "products" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "image" TEXT,
+    "image" TEXT[],
     "color" TEXT[],
     "category" TEXT[],
-    "price" TEXT NOT NULL,
-    "brand" TEXT[],
+    "price" INTEGER NOT NULL,
+    "brand" TEXT NOT NULL,
     "countInStock" INTEGER,
     "rating" INTEGER,
     "desc" TEXT NOT NULL,
     "size" TEXT[],
     "numReviews" TEXT,
-    "uuid" UUID NOT NULL,
-    "customerId" INTEGER NOT NULL,
+    "prodId" TEXT NOT NULL,
+    "adminId" INTEGER NOT NULL,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -102,6 +76,16 @@ CREATE TABLE "carts" (
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "cart_products" (
+    "cartId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "addedBy" TEXT NOT NULL,
+
+    CONSTRAINT "cart_products_pkey" PRIMARY KEY ("productId","cartId")
 );
 
 -- CreateTable
@@ -128,7 +112,7 @@ CREATE TABLE "categories" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_acctId_key" ON "users"("acctId");
+CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "profiles_acctId_key" ON "profiles"("acctId");
@@ -137,22 +121,31 @@ CREATE UNIQUE INDEX "profiles_acctId_key" ON "profiles"("acctId");
 CREATE UNIQUE INDEX "profiles_userId_key" ON "profiles"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "products_uuid_key" ON "products"("uuid");
+CREATE UNIQUE INDEX "products_title_key" ON "products"("title");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "products_slug_key" ON "products"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "carts_userId_key" ON "carts"("userId");
 
 -- AddForeignKey
+ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "products" ADD CONSTRAINT "products_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "carts" ADD CONSTRAINT "carts_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CartProducts" ADD CONSTRAINT "CartProducts_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "carts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cart_products" ADD CONSTRAINT "cart_products_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "carts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CartProducts" ADD CONSTRAINT "CartProducts_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cart_products" ADD CONSTRAINT "cart_products_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

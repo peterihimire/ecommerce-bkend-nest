@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { AuthenticatedGuard, RoleGuard } from 'src/auth/guard';
 import { GetUser, Roles } from 'src/auth/decorator';
 import { User } from '@prisma/client';
-import { RoleExceptionFilter } from 'src/exceptions';
+import { RoleExceptionFilter } from 'src/exception';
 // import { AuthDto } from './dto';
 // import { JwtGuard } from 'src/auth/guard';
 

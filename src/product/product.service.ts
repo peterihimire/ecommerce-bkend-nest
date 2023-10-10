@@ -1,5 +1,6 @@
 import {
   Injectable,
+  ConflictException,
   // ForbiddenException, Logger
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,57 +12,42 @@ export class ProductService {
 
   async addProduct(dto: AddProductDto) {
     try {
-      console.log('This is addtocart  payload', dto);
+      console.log('This is add-product dto  payload', dto);
       // // Logger.verbose('This is user payload', user);
 
-      // const acct = await this.prisma.user.findUnique({
-      //   where: {
-      //     email: user.data.email,
-      //   },
-      //   include: {
-      //     profile: true,
-      //     roles: {
-      //       select: {
-      //         userId: false,
-      //         roleId: true,
-      //       },
-      //     },
-      //   },
-      // });
+      const existing_product = await this.prisma.product.findUnique({
+        where: {
+          title: dto.title,
+        },
+      });
+      if (existing_product) {
+        throw new ConflictException(
+          `Product title ${dto.title} already exist!`,
+        );
+      }
 
-      // const roleIds = acct.roles.map((role) => role.roleId);
-
-      // const roles = await this.prisma.role.findMany({
-      //   where: {
-      //     id: { in: roleIds },
-      //   },
-      // });
-
-      // const userWithRoleNames = {
-      //   ...acct,
-      //   roles: roles.map((role) => role.name),
-      // };
-
-      // console.log('These are his roles...', userWithRoleNames);
-
-      // if (!acct) throw new ForbiddenException('No user!');
-      // // const verifyPass = await argon.verify(user.password, password);
-      // // if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
-
-      // delete userWithRoleNames.password;
-      // delete userWithRoleNames.id;
-      // delete userWithRoleNames.createdAt;
-      // delete userWithRoleNames.updatedAt;
-      // delete userWithRoleNames.profile.createdAt;
-      // delete userWithRoleNames.profile.updatedAt;
-      // delete userWithRoleNames.profile.acctId;
-      // delete userWithRoleNames.profile.id;
-      // delete userWithRoleNames.profile.userId;
+      const new_product = await this.prisma.product.create({
+        data: {
+          title: dto.title,
+          slug: dto.slug,
+          image: dto.image,
+          color: dto.color,
+          category: dto.category,
+          price: dto.price,
+          brand: dto.brand,
+          countInStock: dto.countInStock,
+          rating: dto.rating,
+          desc: dto.desc,
+          size: dto.size,
+          numReviews: dto.numReviews,
+          adminId: dto.adminId,
+        },
+      });
 
       return {
         status: 'success',
-        msg: 'Add to cart',
-        // data: userWithRoleNames,
+        msg: 'Product created',
+        data: new_product,
       };
     } catch (error) {
       throw error;
@@ -74,7 +60,7 @@ export class ProductService {
     try {
       return {
         status: 'success',
-        msg: 'Cart info',
+        msg: 'Product info',
         // data: userWithRoleNames,
       };
     } catch (error) {
