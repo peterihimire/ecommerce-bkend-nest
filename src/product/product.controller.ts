@@ -15,27 +15,37 @@ import {
   User,
   // Cart
 } from '@prisma/client';
-import { RoleExceptionFilter } from 'src/exception';
+import {
+  RoleExceptionFilter,
+  HttpExceptionFilter,
+  // ForbiddenException,
+} from 'src/exception';
 
 // @UseGuards(JwtGuard) //parent route
 @Controller('products')
 export class ProductController {
   constructor(private productService: ProductService) {}
 
-  @Roles('admin', 'moderator')
-  @UseFilters(RoleExceptionFilter)
-  @UseGuards(AuthenticatedGuard, RoleGuard) //individual route
   @Post('add_product')
+  @Roles('admin', 'moderator')
+  @UseFilters(HttpExceptionFilter)
+  @UseGuards(AuthenticatedGuard, RoleGuard) //individual route
   addProduct(@Body() dto: AddProductDto) {
-    // console.log('This is user object...', user);
-    console.log('This is the add product body...', dto);
     return this.productService.addProduct(dto);
   }
 
+  @Get('get_products')
   @Roles('admin', 'moderator', 'user')
   @UseFilters(RoleExceptionFilter)
-  @UseGuards(AuthenticatedGuard, RoleGuard) //individual route
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  getproducts() {
+    return this.productService.getProducts();
+  }
+
   @Get('get_product/:id')
+  @Roles('admin', 'moderator', 'user')
+  @UseFilters(RoleExceptionFilter)
+  @UseGuards(AuthenticatedGuard, RoleGuard)
   getproduct(@Param('id') id: number, @GetUser() user: User) {
     console.log('This is user object...', user);
     console.log('This is the id parameter...', id);
