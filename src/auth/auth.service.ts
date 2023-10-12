@@ -177,6 +177,11 @@ export class AuthService {
         },
       });
 
+      if (!user) throw new ForbiddenException('Incorrect login credentials!');
+      const verifyPass = await argon.verify(user.password, password);
+      if (!verifyPass)
+        throw new ForbiddenException('Credential to login incorrect!');
+
       const roleIds = user.roles.map((role) => role.roleId);
 
       const roles = await this.prisma.role.findMany({
@@ -191,10 +196,6 @@ export class AuthService {
       };
 
       console.log('These are his roles...', userWithRoleNames);
-
-      if (!user) throw new ForbiddenException('Incorrect credentials!');
-      const verifyPass = await argon.verify(user.password, password);
-      if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
 
       delete userWithRoleNames.password;
       delete userWithRoleNames.id;

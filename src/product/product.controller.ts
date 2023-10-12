@@ -36,7 +36,7 @@ export class ProductController {
 
   @Get('get_products')
   @Roles('admin', 'moderator', 'user')
-  @UseFilters(RoleExceptionFilter)
+  @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
   getproducts() {
     return this.productService.getProducts();
@@ -46,7 +46,7 @@ export class ProductController {
   @Roles('admin', 'moderator', 'user')
   @UseFilters(RoleExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
-  getproduct(@Param('id') id: number, @GetUser() user: User) {
+  getproduct(@Param('id') id: string, @GetUser() user: User) {
     console.log('This is user object...', user);
     console.log('This is the id parameter...', id);
     return this.productService.getProduct(id);

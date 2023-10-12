@@ -1,6 +1,7 @@
 import {
   Injectable,
   ConflictException,
+  NotFoundException,
   // ForbiddenException, Logger
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -74,14 +75,22 @@ export class ProductService {
   // @route GET api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
-  async getProduct(id: number) {
+  async getProduct(id: string) {
     console.log('Product id', id);
 
     try {
+      const product = await this.prisma.product.findMany({
+        where: { prodId: id },
+      });
+      const main_product = product[0];
+      console.log('This is the product', main_product, typeof main_product);
+      if (main_product === undefined)
+        throw new NotFoundException('Product does not exist');
+
       return {
         status: 'success',
         msg: 'Product info',
-        // data: userWithRoleNames,
+        data: main_product,
       };
     } catch (error) {
       throw error;
