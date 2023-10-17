@@ -16,7 +16,7 @@ import {
   // Cart
 } from '@prisma/client';
 import {
-  RoleExceptionFilter,
+  // RoleExceptionFilter,
   HttpExceptionFilter,
   // ForbiddenException,
 } from 'src/exception';
@@ -44,7 +44,8 @@ export class ProductController {
 
   @Get('get_product/:id')
   @Roles('admin', 'moderator', 'user')
-  @UseFilters(RoleExceptionFilter)
+  // @UseFilters(RoleExceptionFilter)
+  @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
   getproduct(@Param('id') id: string, @GetUser() user: User) {
     console.log('This is user object...', user);

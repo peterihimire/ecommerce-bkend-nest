@@ -61,6 +61,7 @@ export class ProductService {
   async getProducts() {
     try {
       const all_products = await this.prisma.product.findMany();
+      if (!all_products) throw new NotFoundException('No product found!');
 
       return {
         status: 'success',
@@ -76,16 +77,15 @@ export class ProductService {
   // @desc To update user by account ID
   // @access Private
   async getProduct(id: string) {
-    console.log('Product id', id);
+    // console.log('Product id', id);
 
     try {
       const product = await this.prisma.product.findMany({
         where: { prodId: id },
       });
+
       const main_product = product[0];
-      console.log('This is the product', main_product, typeof main_product);
-      if (main_product === undefined)
-        throw new NotFoundException('Product does not exist');
+      if (!main_product) throw new NotFoundException('Product does not exist!');
 
       return {
         status: 'success',
