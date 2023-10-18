@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { AddProductDto } from './dto';
+import { AddProductDto, EditProductDto } from './dto';
 
 @Injectable()
 export class ProductService {
@@ -52,6 +52,8 @@ export class ProductService {
         }
       }
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
 
@@ -80,20 +82,61 @@ export class ProductService {
     // console.log('Product id', id);
 
     try {
-      const product = await this.prisma.product.findMany({
+      const product = await this.prisma.product.findUnique({
         where: { prodId: id },
       });
 
-      const main_product = product[0];
-      if (!main_product) throw new NotFoundException('Product does not exist!');
+      if (!product) throw new NotFoundException('Product does not exist!');
 
       return {
         status: 'success',
         msg: 'Product info',
-        data: main_product,
+        data: product,
       };
     } catch (error) {
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
+    }
+  }
+
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
+  async editProduct(id: string, dto: EditProductDto) {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { prodId: id },
+      });
+      if (!product) throw new NotFoundException('Product does not exist!');
+
+      const updatedProduct = await this.prisma.product.update({
+        where: { prodId: id },
+        data: {
+          title: dto.title,
+          slug: dto.slug,
+          image: dto.image,
+          color: dto.color,
+          category: dto.category,
+          price: dto.price,
+          brand: dto.brand,
+          countInStock: dto.countInStock,
+          rating: dto.rating,
+          desc: dto.desc,
+          size: dto.size,
+          numReviews: dto.numReviews,
+        },
+      });
+
+      return {
+        status: 'success',
+        msg: 'Product updated',
+        data: updatedProduct,
+      };
+    } catch (error) {
+      throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
 }

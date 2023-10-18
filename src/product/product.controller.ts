@@ -6,18 +6,19 @@ import {
   Post,
   Body,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { AuthenticatedGuard, RoleGuard } from 'src/auth/guard';
 import { GetUser, Roles } from 'src/auth/decorator';
-import { AddProductDto } from './dto';
+import { AddProductDto, EditProductDto } from './dto';
 import {
   User,
   // Cart
 } from '@prisma/client';
 import {
-  // RoleExceptionFilter,
   HttpExceptionFilter,
+  // RoleExceptionFilter,
   // ForbiddenException,
 } from 'src/exception';
 
@@ -42,14 +43,21 @@ export class ProductController {
     return this.productService.getProducts();
   }
 
+  // @UseFilters(RoleExceptionFilter)
   @Get('get_product/:id')
   @Roles('admin', 'moderator', 'user')
-  // @UseFilters(RoleExceptionFilter)
   @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
   getproduct(@Param('id') id: string, @GetUser() user: User) {
     console.log('This is user object...', user);
-    console.log('This is the id parameter...', id);
     return this.productService.getProduct(id);
+  }
+
+  @Patch('edit_product/:id')
+  @Roles('admin', 'moderator')
+  @UseFilters(HttpExceptionFilter)
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  editproduct(@Param('id') id: string, @Body() dto: EditProductDto) {
+    return this.productService.editProduct(id, dto);
   }
 }
