@@ -5,6 +5,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
   async profile(user: any) {
     try {
       console.log('This is user payload', user);
@@ -61,6 +64,8 @@ export class UserService {
       };
     } catch (error) {
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
 }

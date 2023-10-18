@@ -72,6 +72,8 @@ export class ProductService {
       };
     } catch (error) {
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
 
@@ -79,8 +81,6 @@ export class ProductService {
   // @desc To update user by account ID
   // @access Private
   async getProduct(id: string) {
-    // console.log('Product id', id);
-
     try {
       const product = await this.prisma.product.findUnique({
         where: { prodId: id },
@@ -132,6 +132,31 @@ export class ProductService {
         status: 'success',
         msg: 'Product updated',
         data: updatedProduct,
+      };
+    } catch (error) {
+      throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
+    }
+  }
+
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
+  async deleteProduct(id: string) {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { prodId: id },
+      });
+      if (!product) throw new NotFoundException('Product does not exist!');
+
+      await this.prisma.product.delete({
+        where: { prodId: id },
+      });
+
+      return {
+        status: 'success',
+        msg: 'Product deleted',
       };
     } catch (error) {
       throw error;

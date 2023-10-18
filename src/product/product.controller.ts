@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { AuthenticatedGuard, RoleGuard } from 'src/auth/guard';
@@ -59,5 +60,13 @@ export class ProductController {
   @UseGuards(AuthenticatedGuard, RoleGuard)
   editproduct(@Param('id') id: string, @Body() dto: EditProductDto) {
     return this.productService.editProduct(id, dto);
+  }
+
+  @Delete('delete_product/:id')
+  @Roles('admin', 'moderator')
+  @UseFilters(HttpExceptionFilter)
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  deleteproduct(@Param('id') id: string) {
+    return this.productService.deleteProduct(id);
   }
 }

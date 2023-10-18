@@ -17,6 +17,10 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
+
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
   async register(dto: RegDto) {
     const hash = await argon.hash(dto.password);
 
@@ -90,6 +94,9 @@ export class AuthService {
     }
   }
 
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
   async login(dto: AuthDto) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -117,6 +124,8 @@ export class AuthService {
       };
     } catch (error) {
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
     // return { msg: 'Registration success' };
   }
@@ -160,6 +169,9 @@ export class AuthService {
     return user;
   }
 
+  // @route GET api/admin/get_user_by_acct_id
+  // @desc To update user by account ID
+  // @access Private
   async verifyUser(email: string, password: string) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -209,6 +221,8 @@ export class AuthService {
       };
     } catch (error) {
       throw error;
+    } finally {
+      await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
 }
