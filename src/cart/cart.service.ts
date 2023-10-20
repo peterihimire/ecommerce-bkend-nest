@@ -20,7 +20,7 @@ export class CartService {
       console.log('This is addtocart  payload', dto);
       console.log('This is session data in service', session);
 
-      let availableCart: CartType;
+      let fetchedCart: CartType;
       let newQty = 1;
 
       const existingUser = await this.prisma.user.findUnique({
@@ -36,17 +36,17 @@ export class CartService {
             userId: existingUser.id,
           },
         });
-        availableCart = createdCart;
+        fetchedCart = createdCart;
       } else {
-        availableCart = existingUser.cart;
+        fetchedCart = existingUser.cart;
       }
 
       console.log('This is the existing user info', existingUser);
-      console.log('This is the available cart', availableCart);
+      console.log('This is the fetched cart', fetchedCart);
 
       const existingProduct = await this.prisma.cartProducts.findMany({
         where: {
-          cartId: availableCart.id,
+          cartId: fetchedCart.id,
         },
         include: {
           product: true, // Assuming `product` is the relation name
@@ -60,32 +60,7 @@ export class CartService {
       //     select: { quantity: true }, // Assuming `quantity` is the field you want to select
       //   });
 
-      //   if (cartProduct) {
-      //     newQty = cartProduct.quantity + 1;
-      //   }
-      // }
-
-      // if (existingProduct.length) {
-      //   newQty = (await existingProduct[0].CartProducts.quantity) + 1;
-      // }
-
-      // if (existingProduct) {
-      //   newQty = existingProduct.quantity + 1;
-      //   await this.prisma.cartProducts.update({
-      //     where: { id: existingProduct.id },
-      //     data: { quantity: newQty },
-      //   });
-      // } else {
-      //   await this.prisma.cartProducts.create({
-      //     data: {
-      //       quantity: newQty,
-      //       productId: existingProduct.id,
-      //       cartId: existingUser.cart.id,
-      //     },
-      //   });
-      // }
-
-      console.log('This is existing product in cart', existingProduct);
+      console.log('This is existing product', existingProduct);
       console.log('This is new quantity', (newQty = newQty));
 
       // Logger.verbose('This is user payload', user);
@@ -210,3 +185,28 @@ export class CartService {
 //     products: true,
 //   },
 // });
+
+//   if (cartProduct) {
+//     newQty = cartProduct.quantity + 1;
+//   }
+// }
+
+// if (existingProduct.length) {
+//   newQty = (await existingProduct[0].CartProducts.quantity) + 1;
+// }
+
+// if (existingProduct) {
+//   newQty = existingProduct.quantity + 1;
+//   await this.prisma.cartProducts.update({
+//     where: { id: existingProduct.id },
+//     data: { quantity: newQty },
+//   });
+// } else {
+//   await this.prisma.cartProducts.create({
+//     data: {
+//       quantity: newQty,
+//       productId: existingProduct.id,
+//       cartId: existingUser.cart.id,
+//     },
+//   });
+// }
