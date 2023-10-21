@@ -83,7 +83,7 @@ export class ProductService {
   async getProduct(id: string) {
     try {
       const product = await this.prisma.product.findUnique({
-        where: { prodId: id },
+        where: { uuid: id },
       });
 
       if (!product) throw new NotFoundException('Product does not exist!');
@@ -106,12 +106,12 @@ export class ProductService {
   async editProduct(id: string, dto: EditProductDto) {
     try {
       const product = await this.prisma.product.findUnique({
-        where: { prodId: id },
+        where: { uuid: id },
       });
       if (!product) throw new NotFoundException('Product does not exist!');
 
       const updatedProduct = await this.prisma.product.update({
-        where: { prodId: id },
+        where: { uuid: id },
         data: {
           title: dto.title,
           slug: dto.slug,
@@ -146,12 +146,12 @@ export class ProductService {
   async deleteProduct(id: string) {
     try {
       const product = await this.prisma.product.findUnique({
-        where: { prodId: id },
+        where: { uuid: id },
       });
       if (!product) throw new NotFoundException('Product does not exist!');
 
       await this.prisma.product.delete({
-        where: { prodId: id },
+        where: { uuid: id },
       });
 
       return {

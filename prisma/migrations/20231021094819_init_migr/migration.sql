@@ -62,7 +62,7 @@ CREATE TABLE "products" (
     "desc" TEXT NOT NULL,
     "size" TEXT[],
     "numReviews" TEXT,
-    "prodId" TEXT NOT NULL,
+    "uuid" TEXT NOT NULL,
     "adminId" INTEGER NOT NULL,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
@@ -74,6 +74,7 @@ CREATE TABLE "carts" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "userId" INTEGER NOT NULL,
+    "uuid" TEXT NOT NULL,
 
     CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
 );
@@ -82,6 +83,8 @@ CREATE TABLE "carts" (
 CREATE TABLE "cart_products" (
     "cartId" INTEGER NOT NULL,
     "productId" INTEGER NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "uuid" TEXT NOT NULL,
     "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "addedBy" TEXT NOT NULL,
 
@@ -91,6 +94,7 @@ CREATE TABLE "cart_products" (
 -- CreateTable
 CREATE TABLE "orders" (
     "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -127,7 +131,19 @@ CREATE UNIQUE INDEX "products_title_key" ON "products"("title");
 CREATE UNIQUE INDEX "products_slug_key" ON "products"("slug");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "products_uuid_key" ON "products"("uuid");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "carts_userId_key" ON "carts"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "carts_uuid_key" ON "carts"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cart_products_uuid_key" ON "cart_products"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "orders_uuid_key" ON "orders"("uuid");
 
 -- AddForeignKey
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
