@@ -263,12 +263,14 @@ export class CartService {
           data: { quantity: existingCartProd.quantity + dto.quantity },
         });
       }
+
       if (updatedCart.quantity === 0) {
         return {
           status: 'success',
           msg: `Product ${product.title} removed from cart`,
         };
       }
+
       console.log('This is updated cart info', updatedCart);
 
       return {
@@ -290,6 +292,77 @@ export class CartService {
     try {
       console.log('Product id', prodId);
       console.log('session info', session);
+
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: session.email },
+        include: {
+          cart: {
+            include: {
+              cartProducts: {
+                include: {
+                  product: {
+                    select: {
+                      title: true, // Include the fields you need
+                      price: true, // Include the fields you need
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      console.log('This is the product...', existingUser);
+
+      if (!existingUser)
+        throw new NotFoundException(`Account ${session.email} not found!`);
+
+      const cartWithProducts = await this.prisma.cart.findUnique({
+        where: {
+          id: existingUser.cart.id,
+        },
+        include: {
+          cartProducts: true,
+        },
+      });
+
+      const product = await this.prisma.product.findUnique({
+        where: {
+          uuid: prodId,
+        },
+        include: {
+          cartProducts: true,
+        },
+      });
+
+      if (!product)
+        throw new NotFoundException(`Product not available in your cart!`);
+
+      const existingCartProd = cartWithProducts.cartProducts.find(
+        (item) => item.productId === product.id,
+      );
+
+      if (!existingCartProd) {
+        throw new NotFoundException(
+          `Product ${product.title} not found in the cart!`,
+        );
+      }
+
+      await this.prisma.cartProducts.delete({
+        where: {
+          productId_cartId: {
+            productId: product.id,
+            cartId: existingUser.cart.id,
+          },
+        },
+      });
+      console.log('This line was accessed bray!');
+
+      return {
+        status: 'success',
+        msg: `Cart item ${product.title} deleted`,
+        // data: existingCartProd,
+      };
     } catch (error) {
       throw error;
     } finally {

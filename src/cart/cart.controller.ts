@@ -73,7 +73,7 @@ export class CartController {
   @Roles('admin', 'moderator', 'user')
   @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard) //individual route
-  @Delete('delete_cart_product')
+  @Delete('delete_cart_item/:prodId')
   deleteCartItem(
     @Session() session: Record<string, any>,
     @Param('prodId') prodId: string,
