@@ -31,4 +31,16 @@ export class AuthController {
     // console.log('This is the user mfk...', req.session.user);
     return req.user;
   }
+
+  //Get / logout
+  // @UseGuards(LocalGuard)
+  @Post('signout')
+  signout(@Request() req) {
+    req.session.destroy();
+
+    return {
+      status: 'success',
+      msg: 'Logout successful!',
+    };
+  }
 }

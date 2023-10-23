@@ -10,7 +10,7 @@ import { AddToCartDto, UpdateCartDto } from './dto';
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
-  // @route GET api/admin/get_user_by_acct_id
+  // @route POST api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
   async addToCart(dto: AddToCartDto, session: any) {
@@ -166,7 +166,7 @@ export class CartService {
     }
   }
 
-  // @route GET api/admin/get_user_by_acct_id
+  // @route PATCH api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
   async updateCart(dto: UpdateCartDto, session: any) {
@@ -285,7 +285,7 @@ export class CartService {
     }
   }
 
-  // @route GET api/admin/get_user_by_acct_id
+  // @route DELETE api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
   async deleteCartItem(prodId: string, session: any) {

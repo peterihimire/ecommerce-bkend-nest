@@ -225,40 +225,20 @@ export class AuthService {
       await this.prisma.$disconnect(); // Disconnect the Prisma client
     }
   }
+
+  // // @route GET api/admin/get_user_by_acct_id
+  // // @desc To update user by account ID
+  // // @access Private
+  // async signout() {
+  //   try {
+  //     return {
+  //       status: 'success',
+  //       msg: 'Logout successful!',
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   } finally {
+  //     await this.prisma.$disconnect(); // Disconnect the Prisma client
+  //   }
+  // }
 }
-
-// async verifyUser(email: string, password: string) {
-//   try {
-//     const user = await this.prisma.user.findUnique({
-//       where: {
-//         email: email,
-//       },
-//       include: {
-//         // profile: true,
-//         roles: {
-//           select: {
-//             userId: false,
-//             roleId: true,
-//           },
-//         },
-//       },
-//     });
-
-//     if (!user) throw new ForbiddenException('Incorrect credentials!');
-//     const verifyPass = await argon.verify(user.password, password);
-//     if (!verifyPass) throw new ForbiddenException('Credential incorrect!');
-
-//     delete user.password;
-//     delete user.id;
-//     delete user.createdAt;
-//     delete user.updatedAt;
-
-//     return {
-//       status: 'success',
-//       msg: 'User login successful!',
-//       data: user,
-//     };
-//   } catch (error) {
-//     throw error;
-//   }
-// }
