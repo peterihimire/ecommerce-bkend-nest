@@ -13,7 +13,7 @@ import {
 import { OrderService } from './order.service';
 import { AuthenticatedGuard, RoleGuard } from 'src/auth/guard';
 import { GetUser, Roles } from 'src/auth/decorator';
-import { AddToOrderDto, UpdateOrderDto } from './dto';
+import { CreateOrderDto, UpdateOrderDto } from './dto';
 import {
   User,
   // Cart
@@ -21,7 +21,7 @@ import {
 import { HttpExceptionFilter } from 'src/exception';
 
 // @UseGuards(JwtGuard) //parent route
-@Controller('carts')
+@Controller('orders')
 export class OrderController {
   constructor(private cartService: OrderService) {}
 
@@ -29,14 +29,14 @@ export class OrderController {
   @Roles('admin', 'moderator', 'user')
   @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
-  addToCart(
+  createOrder(
     @Session() session: Record<string, any>,
-    @Body() dto: AddToOrderDto,
+    @Body() dto: CreateOrderDto,
     // @GetUser() user: User,
   ) {
     console.log('This is the session data...', session.user.data);
     const sess = session.user.data;
-    return this.cartService.addToCart(dto, sess);
+    return this.cartService.createOrder(dto, sess);
   }
 
   @Roles('admin', 'moderator', 'user')

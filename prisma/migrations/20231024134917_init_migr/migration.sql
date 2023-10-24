@@ -86,7 +86,7 @@ CREATE TABLE "cart_products" (
     "quantity" INTEGER NOT NULL,
     "uuid" TEXT NOT NULL,
     "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "addedBy" TEXT NOT NULL,
+    "addedBy" TEXT,
 
     CONSTRAINT "cart_products_pkey" PRIMARY KEY ("productId","cartId")
 );
@@ -97,8 +97,24 @@ CREATE TABLE "orders" (
     "uuid" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "customerId" INTEGER NOT NULL,
 
     CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "order_products" (
+    "orderId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "address" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "uuid" TEXT NOT NULL,
+    "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "addedBy" TEXT,
+
+    CONSTRAINT "order_products_pkey" PRIMARY KEY ("productId","orderId")
 );
 
 -- CreateTable
@@ -110,6 +126,30 @@ CREATE TABLE "categories" (
     "desc" TEXT NOT NULL,
 
     CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admins" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "user_name" TEXT NOT NULL,
+    "last_login" TIMESTAMP(3) NOT NULL,
+    "phone" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+
+    CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admin_roles" (
+    "adminId" INTEGER NOT NULL,
+    "roleId" INTEGER NOT NULL,
+
+    CONSTRAINT "admin_roles_pkey" PRIMARY KEY ("roleId","adminId")
 );
 
 -- CreateIndex
@@ -145,6 +185,9 @@ CREATE UNIQUE INDEX "cart_products_uuid_key" ON "cart_products"("uuid");
 -- CreateIndex
 CREATE UNIQUE INDEX "orders_uuid_key" ON "orders"("uuid");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "order_products_uuid_key" ON "order_products"("uuid");
+
 -- AddForeignKey
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -165,3 +208,18 @@ ALTER TABLE "cart_products" ADD CONSTRAINT "cart_products_cartId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "cart_products" ADD CONSTRAINT "cart_products_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "orders" ADD CONSTRAINT "orders_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "order_products" ADD CONSTRAINT "order_products_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "order_products" ADD CONSTRAINT "order_products_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admin_roles" ADD CONSTRAINT "admin_roles_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admin_roles" ADD CONSTRAINT "admin_roles_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

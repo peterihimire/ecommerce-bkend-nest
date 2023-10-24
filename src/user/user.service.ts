@@ -19,7 +19,7 @@ export class UserService {
         },
         include: {
           profile: true,
-          roles: {
+          userRoles: {
             select: {
               userId: false,
               roleId: true,
@@ -28,7 +28,7 @@ export class UserService {
         },
       });
 
-      const roleIds = acct.roles.map((role) => role.roleId);
+      const roleIds = acct.userRoles.map((role) => role.roleId);
 
       const roles = await this.prisma.role.findMany({
         where: {

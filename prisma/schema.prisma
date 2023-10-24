@@ -21,9 +21,10 @@ model User {
 
   profile  Profile?
   cart     Cart?
+  orders   Order[]
   products Product[]
 
-  roles UserRoles[]
+  userRoles UserRoles[]
 
   @@map("users")
 }
@@ -35,7 +36,8 @@ model Role {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users UserRoles[]
+  userRoles  UserRoles[]
+  adminRoles AdminRoles[]
 
   @@map("roles")
 }
@@ -91,7 +93,8 @@ model Product {
   admin   User @relation(fields: [adminId], references: [id])
   adminId Int // relation scalar field  (used in the `@relation` attribute above)
 
-  cartProducts CartProducts[]
+  cartProducts  CartProducts[]
+  orderProducts OrderProducts[]
 
   @@map("products")
 }
@@ -119,7 +122,7 @@ model CartProducts {
   quantity  Int
   uuid      String   @unique @default(uuid())
   addedAt   DateTime @default(now())
-  addedBy   String
+  addedBy   String?
 
   @@id([productId, cartId])
   @@map("cart_products")
@@ -132,7 +135,30 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  customer   User @relation(fields: [customerId], references: [id])
+  customerId Int // relation scalar field  (used in the `@relation` attribute above)
+
+  orderProducts OrderProducts[]
+
   @@map("orders")
+}
+
+model OrderProducts {
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int // relation scalar field (used in the `@relation` attribute above)
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int // relation scalar field (used in the `@relation` attribute above)
+  quantity  Int
+  amount    Int
+  address   String
+  status    String  @default("pending")
+
+  uuid    String   @unique @default(uuid())
+  addedAt DateTime @default(now())
+  addedBy String?
+
+  @@id([productId, orderId])
+  @@map("order_products")
 }
 
 model Category {
@@ -145,4 +171,33 @@ model Category {
   desc  String
 
   @@map("categories")
+}
+
+model Admin {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name       String
+  email      String
+  user_name  String
+  last_login DateTime
+  phone      String
+  status     String
+  password   String
+
+  adminRoles AdminRoles[]
+
+  @@map("admins")
+}
+
+model AdminRoles {
+  admin   Admin @relation(fields: [adminId], references: [id])
+  adminId Int // relation scalar field (used in the `@relation` attribute above)
+  role    Role  @relation(fields: [roleId], references: [id])
+  roleId  Int // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([roleId, adminId])
+  @@map("admin_roles")
 }

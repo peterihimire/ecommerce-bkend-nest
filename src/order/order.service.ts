@@ -4,7 +4,8 @@ import {
   // ForbiddenException, Logger
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddToOrderDto, UpdateOrderDto } from './dto';
+import { CreateOrderDto, UpdateOrderDto } from './dto';
+// import { title } from 'process';
 
 @Injectable()
 export class OrderService {
@@ -13,82 +14,85 @@ export class OrderService {
   // @route POST api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
-  async addToCart(dto: AddToOrderDto, session: any) {
-    type CartType = {
-      cartId: number;
-      productId: number;
-      uuid: string;
-      addedBy: string;
-      addedAt: Date;
-      quantity: number;
-    };
+  async createOrder(dto: CreateOrderDto, session: any) {
+    // type CartType = {
+    //   cartId: number;
+    //   productId: number;
+    //   uuid: string;
+    //   addedBy: string;
+    //   addedAt: Date;
+    //   quantity: number;
+    // };
 
     try {
       console.log('This is addtocart  payload', dto);
       console.log('This is session data in service', session);
 
-      let newCart: CartType;
-      const newQty = 1;
-
       const existingUser = await this.prisma.user.findUnique({
         where: { email: session.email },
-        include: { cart: { include: { cartProducts: true } } },
+        include: {
+          cart: {
+            include: {
+              cartProducts: {
+                include: {
+                  product: {
+                    select: {
+                      title: true, // Include the fields you need
+                      price: true, // Include the fields you need
+                    },
+                  },
+                },
+              },
+            },
+          },
+          orders: {
+            include: {
+              orderProducts: {
+                include: {
+                  product: {
+                    select: {
+                      title: true,
+                      price: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!existingUser)
         throw new NotFoundException(`Account ${session.email} not found!`);
 
-      const cart =
-        existingUser.cart ||
-        (await this.prisma.cart.create({ data: { userId: existingUser.id } }));
+      const existingCart = existingUser.cart.cartProducts;
+      if (!existingCart) throw new NotFoundException('No cart record found!');
 
-      const cartWithProducts = await this.prisma.cart.findUnique({
-        where: {
-          id: cart.id,
-        },
-        include: {
-          cartProducts: true,
-        },
+      const mappedProducts = existingCart.map((product) => {
+        return {
+          // name: product.product.title,
+          amount: product.product.price,
+          quantity: product.quantity,
+          address: dto.address,
+          productId: product.productId,
+          addedBy: existingUser.acctId,
+        };
       });
 
-      const product = await this.prisma.product.findUnique({
-        where: {
-          uuid: dto.productId,
+      const createdOrder = await this.prisma.order.create({
+        data: {
+          customerId: existingUser.id,
+          orderProducts: { create: mappedProducts },
         },
         include: {
-          cartProducts: true,
+          orderProducts: true,
         },
       });
-      console.log('This is the cart with product', cartWithProducts);
-
-      const existingCartProd = cartWithProducts.cartProducts.find(
-        (item) => item.productId === product.id,
-      );
-
-      console.log('This is the existing cart product found', existingCartProd);
-
-      if (existingCartProd) {
-        newCart = await this.prisma.cartProducts.update({
-          where: {
-            productId_cartId: { productId: product.id, cartId: cart.id },
-          },
-          data: { quantity: existingCartProd.quantity + newQty },
-        });
-      } else {
-        newCart = await this.prisma.cartProducts.create({
-          data: {
-            quantity: newQty,
-            cartId: cart.id,
-            productId: product.id,
-            addedBy: existingUser.email,
-          },
-        });
-      }
 
       return {
         status: 'success',
-        msg: 'Added to cart',
-        data: newCart,
+        msg: 'Available cart order',
+        data: createdOrder,
       };
     } catch (error) {
       throw error;
@@ -370,3 +374,62 @@ export class OrderService {
     }
   }
 }
+
+// let newCart: CartType;
+// const newQty = 1;
+
+// const existingUser = await this.prisma.user.findUnique({
+//   where: { email: session.email },
+//   include: { cart: { include: { cartProducts: true } } },
+// });
+
+// if (!existingUser)
+//   throw new NotFoundException(`Account ${session.email} not found!`);
+
+// const cart =
+//   existingUser.cart ||
+//   (await this.prisma.cart.create({ data: { userId: existingUser.id } }));
+
+// const cartWithProducts = await this.prisma.cart.findUnique({
+//   where: {
+//     id: cart.id,
+//   },
+//   include: {
+//     cartProducts: true,
+//   },
+// });
+
+// const product = await this.prisma.product.findUnique({
+//   where: {
+//     // uuid: dto.productId,//note here
+//     uuid: dto.address, //note here
+//   },
+//   include: {
+//     cartProducts: true,
+//   },
+// });
+// console.log('This is the cart with product', cartWithProducts);
+
+// const existingCartProd = cartWithProducts.cartProducts.find(
+//   (item) => item.productId === product.id,
+// );
+
+// console.log('This is the existing cart product found', existingCartProd);
+
+// if (existingCartProd) {
+//   newCart = await this.prisma.cartProducts.update({
+//     where: {
+//       productId_cartId: { productId: product.id, cartId: cart.id },
+//     },
+//     data: { quantity: existingCartProd.quantity + newQty },
+//   });
+// } else {
+// newCart = await this.prisma.cartProducts.create({
+//   data: {
+//     quantity: newQty,
+//     cartId: cart.id,
+//     productId: product.id,
+//     addedBy: existingUser.email,
+//   },
+// });
+// }

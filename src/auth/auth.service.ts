@@ -180,7 +180,7 @@ export class AuthService {
         },
         include: {
           // profile: true,
-          roles: {
+          userRoles: {
             select: {
               userId: false,
               roleId: true,
@@ -194,7 +194,7 @@ export class AuthService {
       if (!verifyPass)
         throw new ForbiddenException('Credential to login incorrect!');
 
-      const roleIds = user.roles.map((role) => role.roleId);
+      const roleIds = user.userRoles.map((role) => role.roleId);
 
       const roles = await this.prisma.role.findMany({
         where: {
