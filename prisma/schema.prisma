@@ -68,6 +68,8 @@ model Profile {
   user   User @relation(fields: [userId], references: [id])
   userId Int  @unique // relation scalar field (used in the `@relation` attribute above)
 
+  transactions Transaction[]
+
   @@map("profiles")
 }
 
@@ -81,7 +83,7 @@ model Product {
   image        String[]
   color        String[]
   category     String[]
-  price        Int
+  price        Decimal  @db.Decimal(9, 2)
   brand        String
   countInStock Int?
   rating       Int?
@@ -149,7 +151,7 @@ model OrderProducts {
   product   Product @relation(fields: [productId], references: [id])
   productId Int // relation scalar field (used in the `@relation` attribute above)
   quantity  Int
-  amount    Int
+  amount    Decimal @db.Decimal(9, 2)
   address   String
   status    String  @default("pending")
 
@@ -167,7 +169,7 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title String
+  title String @unique
   desc  String
 
   @@map("categories")
@@ -200,4 +202,28 @@ model AdminRoles {
 
   @@id([roleId, adminId])
   @@map("admin_roles")
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  acct_id               String
+  order_id              String
+  payment_method        String
+  transaction_reference String
+  is_successful         Boolean
+  is_verified           Boolean
+  amount                Decimal  @db.Decimal(9, 2)
+  currency              String
+  payment_gateway       String
+  payment_status        String
+  transaction_id        String
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int
+
+  @@map("transactions")
 }

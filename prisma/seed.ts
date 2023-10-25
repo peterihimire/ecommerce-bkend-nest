@@ -1,39 +1,35 @@
 // prisma/seed.ts
 
 import { PrismaClient } from '@prisma/client';
+// import fs from 'fs';
+import CATEGORIES from './data/categories';
+import ROLES from './data/roles';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
-  // create two dummy articles
-  const role1 = await prisma.role.upsert({
-    where: { name: 'user' },
-    update: {},
-    create: {
-      name: 'user',
-    },
-  });
+  for (const item of CATEGORIES) {
+    // Perform the upsert operation using Prisma
+    const upsertedCat = await prisma.category.upsert({
+      where: { title: item.title }, // Define your unique identifier here
+      create: item, // Data to create if it doesn't exist
+      update: item, // Data to update if it already exists
+    });
 
-  const role2 = await prisma.role.upsert({
-    where: { name: 'admin' },
-    update: {},
-    create: {
-      name: 'admin',
-    },
-  });
+    console.log('Upserted cat:', upsertedCat);
+  }
 
-  const role3 = await prisma.role.upsert({
-    where: { name: 'moderator' },
-    update: {},
-    create: {
-      name: 'moderator',
-    },
-  });
+  for (const item of ROLES) {
+    // Perform the upsert operation using Prisma
+    const upsertedRole = await prisma.role.upsert({
+      where: { name: item.name },
+      create: item,
+      update: item,
+    });
 
-  console.log('Seems like this mfk is running...', role1, role2, role3);
-
-  // const roles = await prisma.role.upsert({data: []})
+    console.log('Upserted role:', upsertedRole);
+  }
 }
 
 // execute the main function

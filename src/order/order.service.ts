@@ -145,7 +145,7 @@ export class OrderService {
 
       const totalOrderPrice = singleOrder.orderProducts.reduce(
         (total, item) => {
-          return total + item.amount * item.quantity;
+          return total + Number(item.amount) * item.quantity;
         },
         0,
       );

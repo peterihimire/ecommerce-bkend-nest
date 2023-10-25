@@ -140,7 +140,7 @@ export class CartService {
       });
 
       const totalCartPrice = cartProducts.reduce((total, item) => {
-        return total + item.price * item.quatity;
+        return total + Number(item.price) * item.quatity;
       }, 0);
 
       const totalCartQty = cartProducts.reduce((total, item) => {
