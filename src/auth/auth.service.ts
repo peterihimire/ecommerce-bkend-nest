@@ -213,6 +213,7 @@ export class AuthService {
       delete userWithRoleNames.id;
       delete userWithRoleNames.createdAt;
       delete userWithRoleNames.updatedAt;
+      delete userWithRoleNames.userRoles;
 
       return {
         status: 'success',

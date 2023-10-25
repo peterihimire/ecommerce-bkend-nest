@@ -25,10 +25,10 @@ import { HttpExceptionFilter } from 'src/exception';
 export class CartController {
   constructor(private cartService: CartService) {}
 
-  @Post('add_to_cart')
   @Roles('admin', 'moderator', 'user')
   @UseFilters(HttpExceptionFilter)
   @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('add_to_cart')
   addToCart(
     @Session() session: Record<string, any>,
     @Body() dto: AddToCartDto,
