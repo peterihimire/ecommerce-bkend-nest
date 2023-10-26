@@ -14,6 +14,7 @@ import RedisStore from 'connect-redis';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ProductModule } from './product/product.module';
     CartModule,
     OrderModule,
     ProductModule,
+    TransactionModule,
     PrismaModule,
     RedisModule,
     ConfigModule.forRoot({
