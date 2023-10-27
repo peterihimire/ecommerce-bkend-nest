@@ -11,7 +11,11 @@ import {
   Session,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { AuthenticatedGuard, RoleGuard } from 'src/auth/guard';
+import {
+  AuthenticatedGuard,
+  RoleGuard,
+  UnauthenticatedGuard,
+} from 'src/auth/guard';
 import { GetUser, Roles } from 'src/auth/decorator';
 import { AddToCartDto, UpdateCartDto } from './dto';
 import {
@@ -25,18 +29,42 @@ import { HttpExceptionFilter } from 'src/exception';
 export class CartController {
   constructor(private cartService: CartService) {}
 
-  @Roles('admin', 'moderator', 'user')
+  // @Roles('admin', 'moderator', 'user')
+  // @UseFilters(HttpExceptionFilter)
+  // @UseGuards(AuthenticatedGuard, RoleGuard)
+  // @Post('add_to_cart')
+  // addToCart(
+  //   @Session() session: Record<string, any>,
+  //   @Body() dto: AddToCartDto,
+  // ) {
+  //   console.log('This is the session data...', session.user.data);
+  //   const sess = session.user.data;
+
+  //   return this.cartService.addToCart(dto, sess);
+  // }
+
   @UseFilters(HttpExceptionFilter)
-  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @UseGuards(UnauthenticatedGuard)
   @Post('add_to_cart')
   addToCart(
     @Session() session: Record<string, any>,
     @Body() dto: AddToCartDto,
-    // @GetUser() user: User,
   ) {
-    console.log('This is the session data...', session.user.data);
-    const sess = session.user.data;
-    return this.cartService.addToCart(dto, sess);
+    if (!session || session === undefined) {
+      // Initialize session for unauthenticated users
+      session = {};
+    }
+    // console.log('This is the session data...', session.user.data);
+    const sess =
+      session && session.user && session.user.data ? session.user.data : null;
+
+    if (sess) {
+      // User is authenticated
+      return this.cartService.addToCart(dto, sess);
+    } else {
+      // User is unauthenticated without session data
+      return this.cartService.addToCart(dto);
+    }
   }
 
   @Roles('admin', 'moderator', 'user')

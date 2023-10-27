@@ -13,7 +13,7 @@ export class CartService {
   // @route POST api/admin/get_user_by_acct_id
   // @desc To update user by account ID
   // @access Private
-  async addToCart(dto: AddToCartDto, session: any) {
+  async addToCart(dto: AddToCartDto, session?: any) {
     type CartType = {
       cartId: number;
       productId: number;
@@ -24,11 +24,55 @@ export class CartService {
     };
 
     try {
+      let newCart: CartType;
+      const newQty = 1;
+
+      if (session === undefined || !session) {
+        console.log('Now add the logic for un-authenticated users...');
+
+        // User is unauthenticated
+        // Handle cart logic for unauthenticated users, e.g., save in session
+
+        console.log('Tis is session', session);
+        let cartData = session?.cart || {};
+
+        if (session === undefined) {
+          session = { cart: {} };
+          cartData = session.cart;
+        }
+
+        const productId = dto.productId;
+
+        if (cartData[productId]) {
+          cartData[productId] += newQty;
+        } else {
+          cartData[productId] = newQty;
+        }
+        console.log('Lets see if it has been openned...', session);
+        session.cart = cartData;
+
+        newCart = {
+          // Define cart information for unauthenticated users
+          cartId: 2, // Assuming a placeholder value for unauthenticated user's cart
+          productId: 2, // Placeholder values
+          uuid: '8b64a7a3-5af6-4f4e-8558-6344bffb51vf', // Placeholder values
+          addedBy: 'Unauthenticated User', // Placeholder value
+          addedAt: new Date(), // Current date and time
+          quantity: newQty,
+        };
+
+        return {
+          status: 'success',
+          msg: 'Added to cart',
+          data: newCart,
+        };
+        // throw new NotFoundException(`Account Not found!`);
+      }
       console.log('This is addtocart  payload', dto);
       console.log('This is session data in service', session);
 
-      let newCart: CartType;
-      const newQty = 1;
+      // let newCart: CartType;
+      // const newQty = 1;
 
       const existingUser = await this.prisma.user.findUnique({
         where: { email: session.email },
