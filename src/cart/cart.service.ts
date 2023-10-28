@@ -32,24 +32,45 @@ export class CartService {
 
         // User is unauthenticated
         // Handle cart logic for unauthenticated users, e.g., save in session
-
         console.log('Tis is session', session);
         let cartData = session?.cart || {};
 
         if (session === undefined) {
-          session = { cart: {} };
+          session = {
+            cart: {
+              userId: 'mypersonalid',
+              products: [],
+              totalQty: 3,
+              totalPrice: 200,
+            },
+          };
           cartData = session.cart;
         }
 
-        const productId = dto.productId;
+        // const productId = dto.productId;
 
-        if (cartData[productId]) {
-          cartData[productId] += newQty;
+        const productId = dto.productId;
+        const productIndex = cartData.products.findIndex(
+          (product) => product.productId === productId,
+        );
+
+        if (productIndex !== -1) {
+          cartData.products[productIndex].quantity += newQty;
         } else {
-          cartData[productId] = newQty;
+          cartData.products.push({
+            productId,
+            quantity: newQty,
+            // Add other product details if available
+          });
         }
-        console.log('Lets see if it has been openned...', session);
+
+        cartData.totalQty += newQty;
+
+        // console.log('Lets see if it has been openned...', session);
         session.cart = cartData;
+        // session.cart.products.push(cartData);
+
+        console.log('This is the cart data', cartData);
 
         newCart = {
           // Define cart information for unauthenticated users
